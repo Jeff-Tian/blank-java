@@ -10,7 +10,6 @@ build
 *.zip
 bin
 obj
-main
 Gemfile.lock
 lib
 __pycache__
