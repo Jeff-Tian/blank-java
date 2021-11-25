@@ -50,8 +50,9 @@ class InvokeTest {
     Context context = new TestContext();
     String requestId = context.getAwsRequestId();
     Handler handler = new Handler();
-    String result = handler.handleRequest(event, context);
-    assertTrue(result.contains("totalCodeSize"));
+    Object result = handler.handleRequest(event, context);
+    System.out.println("result: " + result);
+    assertTrue(result.toString().contains("totalCodeSize"));
     AWSXRay.endSegment();
   }
 

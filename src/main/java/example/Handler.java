@@ -6,6 +6,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 
+import helpers.JsonHelper;
 import software.amazon.awssdk.services.lambda.model.GetAccountSettingsRequest;
 import software.amazon.awssdk.services.lambda.model.GetAccountSettingsResponse;
 import software.amazon.awssdk.services.lambda.model.ServiceException;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 // Handler value: example.Handler
-public class Handler implements RequestHandler<SQSEvent, String>{
+public class Handler implements RequestHandler<SQSEvent, Object>{
   private static final Logger logger = LoggerFactory.getLogger(Handler.class);
   private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
   private static final LambdaAsyncClient lambdaClient = LambdaAsyncClient.create();
@@ -37,12 +38,12 @@ public class Handler implements RequestHandler<SQSEvent, String>{
     }
   }
   @Override
-  public String handleRequest(SQSEvent event, Context context)
+  public Object handleRequest(SQSEvent event, Context context)
   {
-    String response = new String();
+    String response = "";
     // call Lambda API
     logger.info("Getting account settings");
-    CompletableFuture<GetAccountSettingsResponse> accountSettings = 
+    CompletableFuture<GetAccountSettingsResponse> accountSettings =
         lambdaClient.getAccountSettings(GetAccountSettingsRequest.builder().build());
     // log execution details
     logger.info("ENVIRONMENT VARIABLES: {}", gson.toJson(System.getenv()));
@@ -66,6 +67,18 @@ public class Handler implements RequestHandler<SQSEvent, String>{
     } catch(Exception e) {
       e.getStackTrace();
     }
-    return response;
+
+    BusinessResponse bres = new BusinessResponse();
+    bres.accountUsage = response;
+    bres.event = event;
+    bres.context = context;
+
+    AwsResponse res = new AwsResponse();
+    res.isBase64Encoded = false;
+    res.statusCode = 200;
+    res.body = JsonHelper.stringify(bres);
+    res.headers = new Object();
+
+    return res;
   }
 }

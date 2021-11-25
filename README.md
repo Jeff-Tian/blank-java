@@ -1,5 +1,9 @@
 # Blank function (Java)
 
+## Restful Endpoint
+
+- https://ixqjctn825.execute-api.us-east-1.amazonaws.com/default/blank-java-function-rHHNyqQn8LwZ/
+
 ![Architecture](/sample-apps/blank-java/images/sample-blank-java.png)
 
 The project source includes function code and supporting resources:
