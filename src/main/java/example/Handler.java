@@ -48,9 +48,15 @@ public class Handler implements RequestHandler<SQSEvent, String>{
     logger.info("ENVIRONMENT VARIABLES: {}", gson.toJson(System.getenv()));
     logger.info("CONTEXT: {}", gson.toJson(context));
     logger.info("EVENT: {}", gson.toJson(event));
+
+
     // process event
-    for(SQSMessage msg : event.getRecords()){
-      logger.info(msg.getBody());
+    List<SQSMessage> records = event.getRecords();
+
+    if(records != null && records.size() > 0) {
+      for (SQSMessage msg : event.getRecords()) {
+        logger.info(msg.getBody());
+      }
     }
     // process Lambda API response
     try {
