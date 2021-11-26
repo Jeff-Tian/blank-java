@@ -4,6 +4,13 @@
 
 - https://ixqjctn825.execute-api.us-east-1.amazonaws.com/default/blank-java-function-rHHNyqQn8LwZ/
 
+## Test
+
+```shell
+docker compose up -d
+gradle clean test
+```
+
 ![Architecture](/sample-apps/blank-java/images/sample-blank-java.png)
 
 The project source includes function code and supporting resources:
