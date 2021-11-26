@@ -2,6 +2,8 @@ package example;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import org.junit.jupiter.api.Test;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -29,44 +31,40 @@ import com.amazonaws.xray.AWSXRayRecorderBuilder;
 import com.amazonaws.xray.strategy.sampling.NoSamplingStrategy;
 
 class InvokeTest {
-  private static final Logger logger = LoggerFactory.getLogger(InvokeTest.class);
-  Gson gson = new GsonBuilder()
-          .registerTypeAdapter(SQSEvent.class, new SQSEventDeserializer())
-          .setPrettyPrinting()
-          .create();
+    private static final Logger logger = LoggerFactory.getLogger(InvokeTest.class);
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(SQSEvent.class, new SQSEventDeserializer())
+            .setPrettyPrinting()
+            .create();
 
-  public InvokeTest() {
-    AWSXRayRecorderBuilder builder = AWSXRayRecorderBuilder.standard();
-    builder.withSamplingStrategy(new NoSamplingStrategy());
-    AWSXRay.setGlobalRecorder(builder.build());
-  }
+    public InvokeTest() {
+        AWSXRayRecorderBuilder builder = AWSXRayRecorderBuilder.standard();
+        builder.withSamplingStrategy(new NoSamplingStrategy());
+        AWSXRay.setGlobalRecorder(builder.build());
+    }
 
-  @Test
-  void invokeTest() {
-    AWSXRay.beginSegment("blank-java-test");
-    String path = "src/test/resources/event.json";
-    String eventString = loadJsonFile(path);
-    SQSEvent event = gson.fromJson(eventString, SQSEvent.class);
-    Context context = new TestContext();
-    String requestId = context.getAwsRequestId();
-    Handler handler = new Handler();
-    Object result = handler.handleRequest(event, context);
-    System.out.println("result: " + result);
-    assertTrue(result.toString().contains("totalCodeSize"));
-    AWSXRay.endSegment();
-  }
+    @Test
+    void invokeTest() {
+        AWSXRay.beginSegment("blank-java-test");
+        String path = "src/test/resources/event.json";
+        String eventString = loadJsonFile(path);
+        APIGatewayProxyRequestEvent event = gson.fromJson(eventString, APIGatewayProxyRequestEvent.class);
+        Context context = new TestContext();
+        String requestId = context.getAwsRequestId();
+        Handler handler = new Handler();
+        Object result = handler.handleRequest(event, context);
+        System.out.println("result: " + result);
+        assertTrue(result.toString().contains("totalCodeSize"));
+        AWSXRay.endSegment();
+    }
 
-  private static String loadJsonFile(String path)
-  {
-      StringBuilder stringBuilder = new StringBuilder();
-      try (Stream<String> stream = Files.lines( Paths.get(path), StandardCharsets.UTF_8))
-      {
-          stream.forEach(s -> stringBuilder.append(s));
-      }
-      catch (IOException e)
-      {
-          e.printStackTrace();
-      }
-      return stringBuilder.toString();
-  }
+    private static String loadJsonFile(String path) {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines(Paths.get(path), StandardCharsets.UTF_8)) {
+            stream.forEach(s -> stringBuilder.append(s));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stringBuilder.toString();
+    }
 }

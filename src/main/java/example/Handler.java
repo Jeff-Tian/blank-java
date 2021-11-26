@@ -3,6 +3,8 @@ package example;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
 
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 // Handler value: example.Handler
-public class Handler implements RequestHandler<SQSEvent, Object>{
+public class Handler  implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
   private static final Logger logger = LoggerFactory.getLogger(Handler.class);
   private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
   private static final LambdaAsyncClient lambdaClient = LambdaAsyncClient.create();
@@ -38,7 +40,7 @@ public class Handler implements RequestHandler<SQSEvent, Object>{
     }
   }
   @Override
-  public Object handleRequest(SQSEvent event, Context context)
+  public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context)
   {
     String response = "";
     // call Lambda API
@@ -50,15 +52,6 @@ public class Handler implements RequestHandler<SQSEvent, Object>{
     logger.info("CONTEXT: {}", gson.toJson(context));
     logger.info("EVENT: {}", gson.toJson(event));
 
-
-    // process event
-    List<SQSMessage> records = event.getRecords();
-
-    if(records != null && records.size() > 0) {
-      for (SQSMessage msg : event.getRecords()) {
-        logger.info(msg.getBody());
-      }
-    }
     // process Lambda API response
     try {
       GetAccountSettingsResponse settings = accountSettings.get();
@@ -73,12 +66,10 @@ public class Handler implements RequestHandler<SQSEvent, Object>{
     bres.event = event;
     bres.context = context;
 
-    AwsResponse res = new AwsResponse();
-    res.isBase64Encoded = false;
-    res.statusCode = 200;
-    res.body = JsonHelper.stringify(bres);
-    res.headers = new Object();
+    APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent();
+    responseEvent.setBody(JsonHelper.stringify(bres));
+    responseEvent.setStatusCode(200);
 
-    return res;
+    return responseEvent;
   }
 }
