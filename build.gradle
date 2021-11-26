@@ -20,6 +20,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.13.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.13.0'
     implementation 'io.streamnative:pulsar-client:2.8.1.22'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
     runtimeOnly 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.0'
